@@ -10,4 +10,4 @@ RUN apt update &&\
 # sample weight data download
 RUN cd /home/catkin_ws/src/yolox_ros1/config/yolox/weight &&\
     wget https://github.com/Megvii-BaseDetection/YOLOX/releases/download/0.1.1rc0/yolox_s.pth &&\
-    cp /home/catkin_ws/src/YOLOX/exps/default/yolox_s.py /home/catkin_ws/src/yolox_ro1/config/exp
+    cp /home/catkin_ws/src/YOLOX/exps/default/yolox_s.py /home/catkin_ws/src/yolox_ros1/config/exp
