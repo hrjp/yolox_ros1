@@ -10,7 +10,7 @@ git clone https://github.com/hrjp/yolox_ros1
 
 ## 2. dockerコンテナの構築
 ```bash
-./yolox_ros1/docker/run.bash -g
+./yolox_ros1/docker/tl_detect/run.bash -g
 ```
 必要に応じて以下のオプションを指定する
 | Option | Default | Details |
