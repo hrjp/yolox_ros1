@@ -2,7 +2,7 @@
 # yolox_ros1
 YOLOX ROS1 Bridge
 
-# setup
+# Setup
 ## 1. dockerコンテナの構築
 ```bash
 git clone https://github.com/hrjp/yolox_ros1
@@ -12,7 +12,12 @@ git clone https://github.com/hrjp/yolox_ros1
 ```
 
 ## 2. demo
+docker コンテナ内に入った状態で
 ```bash
 roslaunch yolox_ros1 demo.launch
 ```
 
+## 3. 次から以下のコマンドでコンテナに入る
+```bash
+./yolox_tl_detect.bash
+```
