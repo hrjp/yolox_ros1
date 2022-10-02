@@ -5,8 +5,8 @@ RUN apt update &&\
     cd /home/catkin_ws/src &&\
     git clone https://github.com/hrjp/yolox_ros1 &&\
     cd /home/catkin_ws &&\
-    rosdep install -i -y --from-paths src &&\
-    catkin build &&\
+    rosdep install -i -y --from-paths src
+RUN catkin build &&\
     source devel/setup.bash
 
 # sample weight data download
