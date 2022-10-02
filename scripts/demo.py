@@ -188,8 +188,8 @@ class Predictor(object):
     def visual(self, output, img_info, cls_conf=0.35):
         ratio = img_info["ratio"]
         img = img_info["raw_img"]
-        if output is None:
-            return img
+        #if output is None:
+            #return img
         output = output.cpu()
 
         bboxes = output[:, 0:4]
@@ -201,7 +201,11 @@ class Predictor(object):
         scores = output[:, 4] * output[:, 5]
 
         vis_res = vis(img, bboxes, scores, cls, cls_conf, self.cls_names)
-        return vis_res
+        names=[]
+        for name_num in cls:
+            names.append(self.cls_names[int(name_num)])
+
+        return vis_res,bboxes,scores,names
 
 
 def image_demo(predictor, vis_folder, path, current_time, save_result):
@@ -236,7 +240,9 @@ def imageflow_demo(predictor, vis_folder, current_time, args):
         frame = sub_image
 
         outputs, img_info = predictor.inference(frame)
-        result_frame = predictor.visual(outputs[0], img_info, predictor.confthre)
+        #yolox result
+        result_frame,bboxes,scores,names = predictor.visual(outputs[0], img_info, predictor.confthre)
+        print(names)
 
         #ros
         msg = bridge.cv2_to_imgmsg(result_frame, encoding="bgr8")
