@@ -21,3 +21,7 @@ roslaunch yolox_ros1 demo.launch
 ```bash
 ./yolox_tl_detect.bash
 ```
+
+## Demo video
+https://user-images.githubusercontent.com/36100321/193454739-9725bdbd-ce8b-4433-84b0-6b7302a7b3c0.mp4
+
