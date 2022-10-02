@@ -16,8 +16,25 @@ from yolox.data.datasets import COCO_CLASSES
 from yolox.exp import get_exp
 from yolox.utils import fuse_model, get_model_info, postprocess, vis
 
-IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
+import rospy
+import std_msgs.msg
+from cv_bridge import CvBridge
+from sensor_msgs.msg import Image
 
+#ros setting
+rospy.init_node("yolox_ros1")
+bridge = CvBridge()
+def image_callback(msg):
+    global sub_image_msg, sub_image
+    sub_image_msg=msg
+    sub_image=bridge.imgmsg_to_cv2(sub_image_msg)
+rospy.Subscriber("image_raw", Image, image_callback)
+image_pub = rospy.Publisher("yolo_image", Image, queue_size=1)
+rate = rospy.Rate(10)
+
+
+
+IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
 
 def make_parser():
     parser = argparse.ArgumentParser("YOLOX Demo!")
@@ -207,38 +224,21 @@ def image_demo(predictor, vis_folder, path, current_time, save_result):
 
 
 def imageflow_demo(predictor, vis_folder, current_time, args):
-    cap = cv2.VideoCapture(args.path if args.demo == "video" else args.camid)
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    if args.save_result:
-        save_folder = os.path.join(
-            vis_folder, time.strftime("%Y_%m_%d_%H_%M_%S", current_time)
-        )
-        os.makedirs(save_folder, exist_ok=True)
-        if args.demo == "video":
-            save_path = os.path.join(save_folder, os.path.basename(args.path))
-        else:
-            save_path = os.path.join(save_folder, "camera.mp4")
-        logger.info(f"video save_path is {save_path}")
-        vid_writer = cv2.VideoWriter(
-            save_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (int(width), int(height))
-        )
-    while True:
-        ret_val, frame = cap.read()
-        if ret_val:
-            outputs, img_info = predictor.inference(frame)
-            result_frame = predictor.visual(outputs[0], img_info, predictor.confthre)
-            if args.save_result:
-                vid_writer.write(result_frame)
-            else:
-                cv2.namedWindow("yolox", cv2.WINDOW_NORMAL)
-                cv2.imshow("yolox", result_frame)
-            ch = cv2.waitKey(1)
-            if ch == 27 or ch == ord("q") or ch == ord("Q"):
-                break
-        else:
-            break
+    
+    width =  sub_image_msg.width #cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
+    height = sub_image_msg.height #cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
+
+    while not rospy.is_shutdown():
+        ret_val=True
+        frame = sub_image
+
+        outputs, img_info = predictor.inference(frame)
+        result_frame = predictor.visual(outputs[0], img_info, predictor.confthre)
+
+        #ros
+        msg = bridge.cv2_to_imgmsg(result_frame, encoding="bgr8")
+        image_pub.publish(msg)
+        rate.sleep()
 
 
 def main(exp, args):
@@ -315,7 +315,7 @@ def main(exp, args):
 
 if __name__ == "__main__":
     #args = make_parser().parse_args()
-    args = make_parser().parse_args(['webcam', '-n', 'yolox-s', '-c', 'src/YOLOX/yolox_s.pth', '--camid', '0', '--conf', '0.25', '--nms', '0.45', '--tsize', '640', '--device', 'gpu'])
+    args = make_parser().parse_args(['webcam', '-n', 'yolox-s', '-c', os.path.dirname(__file__)+'/../config/weight/yolox_s.pth', '--camid', '0', '--conf', '0.25', '--nms', '0.45', '--tsize', '640', '--device', 'gpu'])
     exp = get_exp(args.exp_file, args.name)
 
     main(exp, args)
