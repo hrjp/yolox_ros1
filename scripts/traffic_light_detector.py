@@ -3,6 +3,7 @@
 # Copyright (c) Megvii, Inc. and its affiliates.
 
 import argparse
+from copy import deepcopy
 import os
 import time
 from loguru import logger
@@ -200,15 +201,14 @@ class Predictor(object):
 def ros_main(predictor, vis_folder, current_time, args):
 
     while not rospy.is_shutdown():
-        frame = sub_image
-
-        outputs, img_info = predictor.inference(frame)
+        frame=deepcopy(sub_image)
+        outputs, img_info = predictor.inference(sub_image)
         #yolox result
         if outputs[0] != None:
             result_frame,bboxes,scores,names = predictor.visual(outputs[0], img_info, predictor.confthre)
             for i, name in enumerate(names):
                 if(name=='traffic light'):
-                    trim_frame=sub_image[int(bboxes[i][1]):int(bboxes[i][3]), int(bboxes[i][0]):int(bboxes[i][2])]
+                    trim_frame=frame[int(bboxes[i][1]):int(bboxes[i][3]), int(bboxes[i][0]):int(bboxes[i][2])]
                     trim_msg=bridge.cv2_to_imgmsg(trim_frame, encoding="bgr8")
                     trim_image_pub.publish(trim_msg)
                     break
