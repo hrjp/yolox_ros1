@@ -30,6 +30,7 @@ def image_callback(msg):
     sub_image=bridge.imgmsg_to_cv2(sub_image_msg)
 rospy.Subscriber("image_raw", Image, image_callback)
 image_pub = rospy.Publisher("yolo_image", Image, queue_size=1)
+trim_image_pub = rospy.Publisher("tl_image", Image, queue_size=1)
 rate = rospy.Rate(10)
 #ros param
 weight_path = rospy.get_param('~weight_file',os.path.dirname(__file__)+'/../config/yolox/weight/yolox_s.pth')
@@ -177,11 +178,11 @@ class Predictor(object):
         ratio = img_info["ratio"]
         img = img_info["raw_img"]
         #if output is None:
-            #return img
+        #    return
         output = output.cpu()
 
         bboxes = output[:, 0:4]
-
+        bboxes_int =bboxes
         # preprocessing: resize
         bboxes /= ratio
 
@@ -199,17 +200,20 @@ class Predictor(object):
 def ros_main(predictor, vis_folder, current_time, args):
 
     while not rospy.is_shutdown():
-        ret_val=True
         frame = sub_image
 
         outputs, img_info = predictor.inference(frame)
         #yolox result
-        result_frame,bboxes,scores,names = predictor.visual(outputs[0], img_info, predictor.confthre)
-        print(bboxes)
-
-        #ros
-        msg = bridge.cv2_to_imgmsg(result_frame, encoding="bgr8")
-        image_pub.publish(msg)
+        if outputs[0] != None:
+            result_frame,bboxes,scores,names = predictor.visual(outputs[0], img_info, predictor.confthre)
+            for i, name in enumerate(names):
+                if(name=='traffic light'):
+                    trim_frame=sub_image[int(bboxes[i][1]):int(bboxes[i][3]), int(bboxes[i][0]):int(bboxes[i][2])]
+                    trim_msg=bridge.cv2_to_imgmsg(trim_frame, encoding="bgr8")
+                    trim_image_pub.publish(trim_msg)
+                    break
+            msg = bridge.cv2_to_imgmsg(result_frame, encoding="bgr8")
+            image_pub.publish(msg)
         rate.sleep()
 
 
