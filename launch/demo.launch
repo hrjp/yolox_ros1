@@ -10,7 +10,7 @@
         <param name="frame_rate" value="30"/>
     </node>
 
-    <node name="yolox" pkg="yolox_ros1" type="yolox_ros_bridge.py" output="screen">
+    <node name="yolox" pkg="yolox_ros1" type="traffic_light_detector.py" output="screen">
         <param name="weight_file" value="$(find yolox_ros1)/config/yolox/weight/yolox_s.pth"/>
         <param name="exp_file" value="$(find yolox_ros1)/config/yolox/exp/yolox_s.py"/>
         <param name="compute_device" value="gpu"/>
