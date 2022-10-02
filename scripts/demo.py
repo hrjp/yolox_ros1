@@ -31,7 +31,10 @@ def image_callback(msg):
 rospy.Subscriber("image_raw", Image, image_callback)
 image_pub = rospy.Publisher("yolo_image", Image, queue_size=1)
 rate = rospy.Rate(10)
-
+#ros param
+weight_path = rospy.get_param('~weight_file',os.path.dirname(__file__)+'/../config/yolox/weight/yolox_s.pth')
+exp_path = rospy.get_param('~exp_file',os.path.dirname(__file__)+'/../config/yolox/exp/yolox_s.py')
+compute_device = rospy.get_param('~compute_device','gpu')
 
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png"]
@@ -225,8 +228,8 @@ def image_demo(predictor, vis_folder, path, current_time, save_result):
 
 def imageflow_demo(predictor, vis_folder, current_time, args):
     
-    width =  sub_image_msg.width #cap.get(cv2.CAP_PROP_FRAME_WIDTH)  # float
-    height = sub_image_msg.height #cap.get(cv2.CAP_PROP_FRAME_HEIGHT)  # float
+    width =  sub_image_msg.width
+    height = sub_image_msg.height
 
     while not rospy.is_shutdown():
         ret_val=True
@@ -315,7 +318,7 @@ def main(exp, args):
 
 if __name__ == "__main__":
     #args = make_parser().parse_args()
-    args = make_parser().parse_args(['webcam', '-n', 'yolox-s', '-c', os.path.dirname(__file__)+'/../config/weight/yolox_s.pth', '--camid', '0', '--conf', '0.25', '--nms', '0.45', '--tsize', '640', '--device', 'gpu'])
+    args = make_parser().parse_args(['webcam', '-f', exp_path, '-c', weight_path, '--conf', '0.25', '--nms', '0.45', '--tsize', '640', '--device', compute_device])
     exp = get_exp(args.exp_file, args.name)
 
     main(exp, args)
