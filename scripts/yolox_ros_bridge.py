@@ -231,9 +231,6 @@ def image_demo(predictor, vis_folder, path, current_time, save_result):
 
 
 def imageflow_demo(predictor, vis_folder, current_time, args):
-    
-    width =  sub_image_msg.width
-    height = sub_image_msg.height
 
     while not rospy.is_shutdown():
         ret_val=True
