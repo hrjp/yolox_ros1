@@ -212,9 +212,13 @@ def ros_main(predictor, vis_folder, current_time, args):
             for i, name in enumerate(names):
                 if(name=='traffic light'):
                     trim_frame=frame[int(bboxes[i][1]):int(bboxes[i][3]), int(bboxes[i][0]):int(bboxes[i][2])]
-                    trim_msg=bridge.cv2_to_imgmsg(trim_frame, encoding="bgr8")
-                    trim_image_pub.publish(trim_msg)
-                    break
+                    width=bboxes[i][3]-bboxes[i][1]
+                    height=bboxes[i][2]-bboxes[i][0]
+                    #縦長の歩行者信号機を抽出
+                    if width>height:
+                        trim_msg=bridge.cv2_to_imgmsg(trim_frame, encoding="bgr8")
+                        trim_image_pub.publish(trim_msg)
+                        break
             msg = bridge.cv2_to_imgmsg(result_frame, encoding="bgr8")
             image_pub.publish(msg)
             #cv2.namedWindow('color_image', cv2.WINDOW_AUTOSIZE)
