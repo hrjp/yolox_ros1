@@ -4,6 +4,7 @@
 
 import argparse
 from copy import deepcopy
+#from distutils.command.build_scripts import first_line_re
 import os
 import time
 from loguru import logger
@@ -25,10 +26,12 @@ from sensor_msgs.msg import Image
 #ros setting
 rospy.init_node("yolox_ros1")
 bridge = CvBridge()
+first_callback=False
 def image_callback(msg):
-    global sub_image_msg, sub_image
+    global sub_image_msg, sub_image,first_callback
     sub_image_msg=msg
-    sub_image=bridge.imgmsg_to_cv2(sub_image_msg)
+    sub_image=bridge.imgmsg_to_cv2(sub_image_msg,"bgr8")
+    first_callback=True
 rospy.Subscriber("image_raw", Image, image_callback)
 image_pub = rospy.Publisher("yolo_image", Image, queue_size=1)
 trim_image_pub = rospy.Publisher("tl_image", Image, queue_size=1)
@@ -214,6 +217,9 @@ def ros_main(predictor, vis_folder, current_time, args):
                     break
             msg = bridge.cv2_to_imgmsg(result_frame, encoding="bgr8")
             image_pub.publish(msg)
+            #cv2.namedWindow('color_image', cv2.WINDOW_AUTOSIZE)
+            #cv2.imshow('color_image', frame)
+            #cv2.waitKey(1)
         rate.sleep()
 
 
@@ -283,6 +289,8 @@ def main(exp, args):
         args.device, args.fp16, args.legacy,
     )
     current_time = time.localtime()
+    while not first_callback:
+        time.sleep(0.001)
     ros_main(predictor, vis_folder, current_time, args)
 
 
