@@ -61,6 +61,7 @@
   <exec_depend>libuvc_camera</exec_depend>
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_transport</exec_depend>
+  <exec_depend>flir_camera_driver</exec_depend>
 
 
 
